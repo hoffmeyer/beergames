@@ -8,13 +8,13 @@ function testEnv(): Env {
   return { DB: createFakeD1(), ASSETS: {} as Fetcher };
 }
 
-async function createTeam(env: Env, name: string, color: string) {
+async function createTeam(env: Env, name: string, avatar: string) {
   return app.request(
     "/api/teams",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color }),
+      body: JSON.stringify({ name, avatar }),
     },
     env,
   );
@@ -68,22 +68,22 @@ describe("GET /api/schedule", () => {
     expect(counts).toEqual({ kubb: 4, flunkyball: 3, tug_of_war: 3 });
   });
 
-  it("shows a placeholder (null name/color) for a slot whose team hasn't been created yet", async () => {
+  it("shows a placeholder (null name/avatar) for a slot whose team hasn't been created yet", async () => {
     const env = testEnv();
     const schedule = await getSchedule(env);
     const round1 = schedule[0];
 
-    expect(round1.restingTeam).toMatchObject({ number: 1, name: null, color: null });
-    expect(round1.matches[0].teamA).toMatchObject({ number: 2, name: null, color: null });
+    expect(round1.restingTeam).toMatchObject({ number: 1, name: null, avatar: null });
+    expect(round1.matches[0].teamA).toMatchObject({ number: 2, name: null, avatar: null });
   });
 
-  it("fills in name/color once a team is created", async () => {
+  it("fills in name/avatar once a team is created", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
     const schedule = await getSchedule(env);
     const round1 = schedule[0];
 
-    expect(round1.restingTeam).toMatchObject({ number: 1, name: "Alpha", color: "#ef4444" });
+    expect(round1.restingTeam).toMatchObject({ number: 1, name: "Alpha", avatar: "alpha-avatar.webp" });
   });
 
   it("has no results recorded yet (winner/recordedAt are null)", async () => {

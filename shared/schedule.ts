@@ -1,10 +1,10 @@
 export type MatchEvent = "kubb" | "flunkyball" | "tug_of_war";
 
-/** A team reference within the schedule; `name`/`color` are null until that slot's team is created. */
+/** A team reference within the schedule; `name`/`avatar` are null until that slot's team is created. */
 export type ScheduleTeamRef = {
   number: number;
   name: string | null;
-  color: string | null;
+  avatar: string | null;
 };
 
 export type ScheduleMatch = {

@@ -1,5 +1,6 @@
 import type { ScheduleMatch } from "../../../shared/schedule";
 import { teamLabel } from "../lib/teamLabel";
+import { TeamAvatar } from "./TeamAvatar";
 
 type ScoreEntryModalProps = {
   match: ScheduleMatch;
@@ -42,10 +43,7 @@ export function ScoreEntryModal({
                   : "border-gray-300"
               }`}
             >
-              <span
-                className="h-4 w-4 shrink-0 rounded-full border border-gray-200"
-                style={{ backgroundColor: team.color ?? "transparent" }}
-              />
+              <TeamAvatar avatar={team.avatar} size="sm" />
               <span className="truncate">{teamLabel(team)}</span>
             </button>
           ))}

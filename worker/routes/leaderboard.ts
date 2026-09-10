@@ -5,7 +5,7 @@ import type { LeaderboardRow } from "../../shared/leaderboard";
 type TeamStandingRow = {
   number: number;
   name: string;
-  color: string;
+  avatar: string;
   wins: number;
   matches_played: number;
   bonus_points: number;
@@ -30,7 +30,7 @@ leaderboard.get("/", async (c) => {
       `SELECT
          t.number                                                                      AS number,
          t.name                                                                        AS name,
-         t.color                                                                       AS color,
+         t.avatar                                                                      AS avatar,
          COALESCE(SUM(CASE WHEN m.winner_team_number = t.number THEN 1 ELSE 0 END), 0) AS wins,
          COALESCE(SUM(CASE
            WHEN m.winner_team_number IS NOT NULL
@@ -122,7 +122,7 @@ function toRow(args: {
   return {
     number: team.number,
     name: team.name,
-    color: team.color,
+    avatar: team.avatar,
     wins: team.wins,
     matchesPlayed: team.matches_played,
     bonusPoints: team.bonus_points,

@@ -7,13 +7,13 @@ function testEnv(): Env {
   return { DB: createFakeD1(), ASSETS: {} as Fetcher };
 }
 
-async function createTeam(env: Env, name: string, color: string) {
+async function createTeam(env: Env, name: string, avatar: string) {
   return app.request(
     "/api/teams",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color }),
+      body: JSON.stringify({ name, avatar }),
     },
     env,
   );
@@ -29,8 +29,8 @@ describe("GET /api/teams", () => {
 
   it("returns created teams ordered by number", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
-    await createTeam(env, "Bravo", "#3b82f6");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
+    await createTeam(env, "Bravo", "beer-avatar.webp");
 
     const res = await app.request("/api/teams", {}, env);
     const body = (await res.json()) as { number: number; name: string }[];
@@ -44,35 +44,41 @@ describe("GET /api/teams", () => {
 describe("POST /api/teams", () => {
   it("assigns numbers in creation order starting at 1", async () => {
     const env = testEnv();
-    const res = await createTeam(env, "Alpha", "#ef4444");
+    const res = await createTeam(env, "Alpha", "alpha-avatar.webp");
     expect(res.status).toBe(201);
-    expect(await res.json()).toMatchObject({ number: 1, name: "Alpha", color: "#ef4444" });
+    expect(await res.json()).toMatchObject({ number: 1, name: "Alpha", avatar: "alpha-avatar.webp" });
   });
 
   it("rejects a missing name", async () => {
     const env = testEnv();
-    const res = await createTeam(env, "", "#ef4444");
+    const res = await createTeam(env, "", "alpha-avatar.webp");
     expect(res.status).toBe(400);
   });
 
-  it("rejects a color outside the fixed palette", async () => {
+  it("rejects an avatar outside the fixed set of options", async () => {
     const env = testEnv();
-    const res = await createTeam(env, "Alpha", "#123456");
+    const res = await createTeam(env, "Alpha", "nonexistent-avatar.webp");
     expect(res.status).toBe(400);
   });
 
-  it("rejects a color already used by another team", async () => {
+  it("rejects an avatar already used by another team", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
-    const res = await createTeam(env, "Bravo", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
+    const res = await createTeam(env, "Bravo", "alpha-avatar.webp");
     expect(res.status).toBe(409);
   });
 
   it("rejects creating a 6th team", async () => {
     const env = testEnv();
-    const palette = ["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#a855f7"];
+    const avatars = [
+      "alpha-avatar.webp",
+      "beer-avatar.webp",
+      "buttcrack-avatar.webp",
+      "gigachad-avatar.webp",
+      "heavymetal-avatar.webp",
+    ];
     for (let i = 0; i < 5; i++) {
-      const res = await createTeam(env, `Team ${i + 1}`, palette[i]);
+      const res = await createTeam(env, `Team ${i + 1}`, avatars[i]);
       expect(res.status).toBe(201);
     }
     const sixth = await app.request(
@@ -80,7 +86,7 @@ describe("POST /api/teams", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Team 6", color: "#ef4444" }),
+        body: JSON.stringify({ name: "Team 6", avatar: "princess-avatar.webp" }),
       },
       env,
     );
@@ -96,8 +102,8 @@ describe("PATCH /api/teams/:number", () => {
 
   beforeEach(async () => {
     env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
-    await createTeam(env, "Bravo", "#3b82f6");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
+    await createTeam(env, "Bravo", "beer-avatar.webp");
   });
 
   it("updates a team's name", async () => {
@@ -111,21 +117,25 @@ describe("PATCH /api/teams/:number", () => {
       env,
     );
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ number: 1, name: "Alpha Renamed", color: "#ef4444" });
+    expect(await res.json()).toMatchObject({
+      number: 1,
+      name: "Alpha Renamed",
+      avatar: "alpha-avatar.webp",
+    });
   });
 
-  it("updates a team's color", async () => {
+  it("updates a team's avatar", async () => {
     const res = await app.request(
       "/api/teams/1",
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ color: "#22c55e" }),
+        body: JSON.stringify({ avatar: "buttcrack-avatar.webp" }),
       },
       env,
     );
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ color: "#22c55e" });
+    expect(await res.json()).toMatchObject({ avatar: "buttcrack-avatar.webp" });
   });
 
   it("never changes the team number", async () => {
@@ -141,26 +151,26 @@ describe("PATCH /api/teams/:number", () => {
     expect((await res.json() as { number: number }).number).toBe(1);
   });
 
-  it("rejects a color already used by a different team", async () => {
+  it("rejects an avatar already used by a different team", async () => {
     const res = await app.request(
       "/api/teams/1",
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ color: "#3b82f6" }),
+        body: JSON.stringify({ avatar: "beer-avatar.webp" }),
       },
       env,
     );
     expect(res.status).toBe(409);
   });
 
-  it("allows re-submitting a team's own current color", async () => {
+  it("allows re-submitting a team's own current avatar", async () => {
     const res = await app.request(
       "/api/teams/1",
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ color: "#ef4444" }),
+        body: JSON.stringify({ avatar: "alpha-avatar.webp" }),
       },
       env,
     );

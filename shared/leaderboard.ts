@@ -1,7 +1,7 @@
 export type LeaderboardRow = {
   number: number;
   name: string;
-  color: string;
+  avatar: string;
   wins: number;
   matchesPlayed: number;
   bonusPoints: number;

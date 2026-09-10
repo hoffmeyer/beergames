@@ -17,7 +17,7 @@ export function fetchTeams(): Promise<Team[]> {
   return fetch("/api/teams").then((res) => handleResponse<Team[]>(res));
 }
 
-export function createTeam(input: { name: string; color: string }): Promise<Team> {
+export function createTeam(input: { name: string; avatar: string }): Promise<Team> {
   return fetch("/api/teams", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,7 +27,7 @@ export function createTeam(input: { name: string; color: string }): Promise<Team
 
 export function updateTeam(
   number: number,
-  input: { name?: string; color?: string },
+  input: { name?: string; avatar?: string },
 ): Promise<Team> {
   return fetch(`/api/teams/${number}`, {
     method: "PATCH",

@@ -9,22 +9,28 @@ function testEnv(): Env {
   return { DB: createFakeD1(), ASSETS: {} as Fetcher };
 }
 
-async function createTeam(env: Env, name: string, color: string) {
+async function createTeam(env: Env, name: string, avatar: string) {
   return app.request(
     "/api/teams",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color }),
+      body: JSON.stringify({ name, avatar }),
     },
     env,
   );
 }
 
 async function createAllTeams(env: Env) {
-  const palette = ["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#a855f7"];
+  const avatars = [
+    "alpha-avatar.webp",
+    "beer-avatar.webp",
+    "buttcrack-avatar.webp",
+    "gigachad-avatar.webp",
+    "heavymetal-avatar.webp",
+  ];
   for (let i = 0; i < 5; i++) {
-    await createTeam(env, `Team ${i + 1}`, palette[i]);
+    await createTeam(env, `Team ${i + 1}`, avatars[i]);
   }
 }
 
@@ -84,8 +90,8 @@ describe("GET /api/leaderboard", () => {
 
   it("only includes created teams, with zero wins before any result is recorded", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
-    await createTeam(env, "Bravo", "#3b82f6");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
+    await createTeam(env, "Bravo", "beer-avatar.webp");
 
     const rows = await getLeaderboard(env);
     expect(rows).toHaveLength(2);

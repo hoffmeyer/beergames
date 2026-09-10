@@ -8,13 +8,13 @@ function testEnv(): Env {
   return { DB: createFakeD1(), ASSETS: {} as Fetcher };
 }
 
-async function createTeam(env: Env, name: string, color: string) {
+async function createTeam(env: Env, name: string, avatar: string) {
   return app.request(
     "/api/teams",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color }),
+      body: JSON.stringify({ name, avatar }),
     },
     env,
   );
@@ -53,7 +53,7 @@ describe("POST /api/teams/:number/bonus-points", () => {
 
   beforeEach(async () => {
     env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
   });
 
   it("creates a bonus point entry", async () => {
@@ -91,7 +91,7 @@ describe("POST /api/teams/:number/bonus-points", () => {
 describe("GET /api/teams/:number/bonus-points", () => {
   it("lists a team's entries ordered by creation", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
     await addBonusPoint(env, 1, 5, "Best costume");
     await addBonusPoint(env, 1, 2, "Team spirit");
 
@@ -102,7 +102,7 @@ describe("GET /api/teams/:number/bonus-points", () => {
 
   it("returns an empty list for a team with no entries", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
     const res = await listBonusPoints(env, 1);
     expect(await res.json()).toEqual([]);
   });
@@ -120,7 +120,7 @@ describe("PATCH /api/bonus-points/:id", () => {
 
   beforeEach(async () => {
     env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
     const created = (await (await addBonusPoint(env, 1, 5, "Best costume")).json()) as TeamBonusPoint;
     entryId = created.id;
   });
@@ -156,7 +156,7 @@ describe("PATCH /api/bonus-points/:id", () => {
 describe("DELETE /api/bonus-points/:id", () => {
   it("removes the entry", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
     const created = (await (await addBonusPoint(env, 1, 5, "Best costume")).json()) as TeamBonusPoint;
 
     const res = await deleteBonusPoint(env, created.id);

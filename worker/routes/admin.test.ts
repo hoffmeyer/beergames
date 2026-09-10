@@ -9,13 +9,13 @@ function testEnv(): Env {
   return { DB: createFakeD1(), ASSETS: {} as Fetcher };
 }
 
-async function createTeam(env: Env, name: string, color: string) {
+async function createTeam(env: Env, name: string, avatar: string) {
   return app.request(
     "/api/teams",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color }),
+      body: JSON.stringify({ name, avatar }),
     },
     env,
   );
@@ -52,8 +52,8 @@ function resetTournament(env: Env) {
 describe("POST /api/admin/reset", () => {
   it("clears teams, bonus points, and match results", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "#ef4444");
-    await createTeam(env, "Beta", "#3b82f6");
+    await createTeam(env, "Alpha", "alpha-avatar.webp");
+    await createTeam(env, "Beta", "beer-avatar.webp");
     await addBonusPoint(env, 1, 5, "Best costume");
     await recordResult(env, 1, 1);
 

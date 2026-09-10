@@ -29,13 +29,13 @@ function deleteResult(env: Env, matchId: number) {
   return app.request(`/api/matches/${matchId}/result`, { method: "DELETE" }, env);
 }
 
-async function createTeam(env: Env, name: string, color: string) {
+async function createTeam(env: Env, name: string, avatar: string) {
   return app.request(
     "/api/teams",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color }),
+      body: JSON.stringify({ name, avatar }),
     },
     env,
   );
@@ -43,9 +43,15 @@ async function createTeam(env: Env, name: string, color: string) {
 
 /** Creates all 5 teams so every schedule slot is a real team, not a placeholder. */
 async function createAllTeams(env: Env) {
-  const palette = ["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#a855f7"];
+  const avatars = [
+    "alpha-avatar.webp",
+    "beer-avatar.webp",
+    "buttcrack-avatar.webp",
+    "gigachad-avatar.webp",
+    "heavymetal-avatar.webp",
+  ];
   for (let i = 0; i < 5; i++) {
-    await createTeam(env, `Team ${i + 1}`, palette[i]);
+    await createTeam(env, `Team ${i + 1}`, avatars[i]);
   }
 }
 

@@ -1,7 +1,7 @@
 # Beerlympiad — Domain Glossary
 
 ## Team
-One of exactly 5 competitors in the tournament. Created once during setup and never deleted. Has an immutable `number` (1-5, assigned in creation order) and a mutable `name` and `color`, editable at any time — including mid- or post-tournament — with no locking.
+One of exactly 5 competitors in the tournament. Created once during setup and never deleted. Has an immutable `number` (1-5, assigned in creation order) and a mutable `name` and `avatar`, editable at any time — including mid- or post-tournament — with no locking.
 
 ## Schedule Slot
 The letter position (A-E) a Team occupies in tournament-schedule.md's fixed schedule. A Schedule Slot is permanently identical to a Team's `number`: slot A is team 1, slot B is team 2, and so on, from the moment that team is created. Each slot carries a fixed rest-round and event mix defined entirely by tournament-schedule.md — this never changes and is never reassigned independently of team creation order.

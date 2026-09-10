@@ -1,5 +1,6 @@
 import type { ScheduleMatch } from "../../../shared/schedule";
 import { teamLabel } from "../lib/teamLabel";
+import { TeamAvatar } from "./TeamAvatar";
 
 const EVENT_LABELS: Record<ScheduleMatch["event"], string> = {
   kubb: "Kubb",
@@ -10,10 +11,7 @@ const EVENT_LABELS: Record<ScheduleMatch["event"], string> = {
 function TeamChip({ team, isWinner }: { team: ScheduleMatch["teamA"]; isWinner: boolean }) {
   return (
     <span className={`flex min-w-0 items-center gap-2 ${isWinner ? "font-semibold" : ""}`}>
-      <span
-        className="h-4 w-4 shrink-0 rounded-full border border-gray-200"
-        style={{ backgroundColor: team.color ?? "transparent" }}
-      />
+      <TeamAvatar avatar={team.avatar} size="sm" />
       <span className={`truncate ${team.name ? "" : "italic text-gray-400"}`}>{teamLabel(team)}</span>
       {isWinner && <span className="shrink-0 text-xs text-blue-600">Winner</span>}
     </span>

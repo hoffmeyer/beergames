@@ -20,7 +20,7 @@ export function TeamsPage() {
       input,
     }: {
       number: number;
-      input: { name?: string; color?: string };
+      input: { name?: string; avatar?: string };
     }) => updateTeam(number, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["teams"] }),
   });
@@ -41,13 +41,13 @@ export function TeamsPage() {
         <TeamCard
           key={team.number}
           team={team}
-          takenColors={teams.filter((t) => t.number !== team.number).map((t) => t.color)}
+          takenAvatars={teams.filter((t) => t.number !== team.number).map((t) => t.avatar)}
           onSave={(input) => updateMutation.mutateAsync({ number: team.number, input })}
         />
       ))}
       {teams.length < 5 && (
         <TeamForm
-          takenColors={teams.map((t) => t.color)}
+          takenAvatars={teams.map((t) => t.avatar)}
           isSubmitting={createMutation.isPending}
           error={createMutation.isError ? (createMutation.error as Error).message : null}
           onSubmit={(input) => createMutation.mutateAsync(input)}
