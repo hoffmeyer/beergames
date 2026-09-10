@@ -10,7 +10,10 @@ function BottomNav() {
     }`;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 flex border-t border-gray-200 bg-white">
+    <nav
+      className="fixed inset-x-0 bottom-0 flex border-t border-gray-200 bg-white"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <NavLink to="/" end className={linkClass}>
         Teams
       </NavLink>
@@ -27,7 +30,10 @@ function BottomNav() {
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50 pb-16">
+      <div
+        className="min-h-screen bg-gray-50"
+        style={{ paddingBottom: "calc(2.75rem + 1px + env(safe-area-inset-bottom))" }}
+      >
         <Routes>
           <Route path="/" element={<TeamsPage />} />
           <Route path="/schedule" element={<SchedulePage />} />

@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createTeam, fetchTeams, updateTeam } from "../lib/api";
 import { TeamCard } from "../components/TeamCard";
 import { TeamForm } from "../components/TeamForm";
+import { LoadingState } from "../components/LoadingState";
+import { ErrorState } from "../components/ErrorState";
 
 export function TeamsPage() {
   const queryClient = useQueryClient();
@@ -24,10 +26,10 @@ export function TeamsPage() {
   });
 
   if (teamsQuery.isLoading) {
-    return <p className="p-4">Loading teams…</p>;
+    return <LoadingState label="Loading teams…" />;
   }
   if (teamsQuery.isError) {
-    return <p className="p-4 text-red-600">Failed to load teams.</p>;
+    return <ErrorState label="Failed to load teams." onRetry={() => teamsQuery.refetch()} />;
   }
 
   const teams = teamsQuery.data ?? [];

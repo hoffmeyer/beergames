@@ -18,18 +18,18 @@ export function TeamCard({ team, takenColors, onSave }: TeamCardProps) {
   if (!editing) {
     return (
       <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <span
             className="h-8 w-8 shrink-0 rounded-full"
             style={{ backgroundColor: team.color }}
           />
-          <span className="font-medium">
+          <span className="truncate font-medium">
             #{team.number} {team.name}
           </span>
         </div>
         <button
           type="button"
-          className="min-h-11 min-w-11 text-sm text-blue-600"
+          className="min-h-11 min-w-11 shrink-0 text-sm text-blue-600"
           onClick={() => {
             setName(team.name);
             setColor(team.color);

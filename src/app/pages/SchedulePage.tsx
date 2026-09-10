@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearMatchResult, fetchSchedule, recordMatchResult } from "../lib/api";
 import { RoundCard } from "../components/RoundCard";
 import { ScoreEntryModal } from "../components/ScoreEntryModal";
+import { LoadingState } from "../components/LoadingState";
+import { ErrorState } from "../components/ErrorState";
 import type { ScheduleMatch } from "../../../shared/schedule";
 
 export function SchedulePage() {
@@ -28,10 +30,10 @@ export function SchedulePage() {
   });
 
   if (scheduleQuery.isLoading) {
-    return <p className="p-4">Loading schedule…</p>;
+    return <LoadingState label="Loading schedule…" />;
   }
   if (scheduleQuery.isError) {
-    return <p className="p-4 text-red-600">Failed to load schedule.</p>;
+    return <ErrorState label="Failed to load schedule." onRetry={() => scheduleQuery.refetch()} />;
   }
 
   const rounds = scheduleQuery.data ?? [];

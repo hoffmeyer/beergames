@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboard } from "../lib/api";
 import type { LeaderboardRow } from "../lib/api";
+import { LoadingState } from "../components/LoadingState";
+import { ErrorState } from "../components/ErrorState";
 
 function tiedNames(rows: LeaderboardRow[], row: LeaderboardRow): string {
   const byNumber = new Map(rows.map((r) => [r.number, r.name]));
@@ -31,10 +33,10 @@ export function LeaderboardPage() {
   });
 
   if (leaderboardQuery.isLoading) {
-    return <p className="p-4">Loading leaderboard…</p>;
+    return <LoadingState label="Loading leaderboard…" />;
   }
   if (leaderboardQuery.isError) {
-    return <p className="p-4 text-red-600">Failed to load leaderboard.</p>;
+    return <ErrorState label="Failed to load leaderboard." onRetry={() => leaderboardQuery.refetch()} />;
   }
 
   const rows = leaderboardQuery.data ?? [];
@@ -56,8 +58,8 @@ export function LeaderboardPage() {
                     className="h-4 w-4 shrink-0 rounded-full border border-gray-300"
                     style={{ backgroundColor: row.color }}
                   />
-                  <span className="flex-1 font-medium">{row.name}</span>
-                  <span className="text-sm text-gray-600">
+                  <span className="min-w-0 flex-1 truncate font-medium">{row.name}</span>
+                  <span className="shrink-0 text-sm text-gray-600">
                     {row.wins} win{row.wins === 1 ? "" : "s"} · {row.matchesPlayed} played
                   </span>
                 </div>

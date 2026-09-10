@@ -25,6 +25,7 @@ export function ScoreEntryModal({
     >
       <div
         className="flex w-full max-w-sm flex-col gap-3 rounded-t-lg bg-white p-4 sm:rounded-lg"
+        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold">Record winner</h2>
