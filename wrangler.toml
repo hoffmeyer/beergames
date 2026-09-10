@@ -1,0 +1,14 @@
+name = "beerlympiad"
+main = "worker/index.ts"
+compatibility_date = "2024-11-01"
+
+[assets]
+directory = "./dist/client"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "beerlympiad"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
