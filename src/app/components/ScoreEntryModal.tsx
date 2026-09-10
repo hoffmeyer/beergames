@@ -36,13 +36,17 @@ export function ScoreEntryModal({
               type="button"
               disabled={isSaving}
               onClick={() => onRecord(team.number)}
-              className={`min-h-11 rounded border px-4 py-2 text-left disabled:opacity-50 ${
+              className={`flex min-h-11 items-center gap-2 rounded border px-4 py-2 text-left disabled:opacity-50 ${
                 match.winnerTeamNumber === team.number
                   ? "border-blue-600 bg-blue-50 font-medium"
                   : "border-gray-300"
               }`}
             >
-              {teamLabel(team)}
+              <span
+                className="h-4 w-4 shrink-0 rounded-full border border-gray-200"
+                style={{ backgroundColor: team.color ?? "transparent" }}
+              />
+              <span className="truncate">{teamLabel(team)}</span>
             </button>
           ))}
         </div>
