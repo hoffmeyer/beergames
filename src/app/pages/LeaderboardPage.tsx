@@ -16,13 +16,14 @@ function tieNote(rows: LeaderboardRow[], row: LeaderboardRow): TieNote | null {
     return null;
   }
   const names = tiedNames(rows, row);
+  const tiedOn = row.bonusPoints > 0 ? "wins and bonus points" : "wins";
   if (row.needsTiebreaker) {
     return { tone: "amber", text: `Tied with ${names} — needs a manual tiebreaker.` };
   }
   if (row.resolvedBy === "head_to_head") {
-    return { tone: "gray", text: `Tied on wins with ${names} — ranked by head-to-head result.` };
+    return { tone: "gray", text: `Tied on ${tiedOn} with ${names} — ranked by head-to-head result.` };
   }
-  return { tone: "gray", text: `Tied on wins with ${names} — pending their head-to-head match.` };
+  return { tone: "gray", text: `Tied on ${tiedOn} with ${names} — pending their head-to-head match.` };
 }
 
 export function LeaderboardPage() {
@@ -60,7 +61,8 @@ export function LeaderboardPage() {
                   />
                   <span className="min-w-0 flex-1 truncate font-medium">{row.name}</span>
                   <span className="shrink-0 text-sm text-gray-600">
-                    {row.wins} win{row.wins === 1 ? "" : "s"} · {row.matchesPlayed} played
+                    {row.wins} win{row.wins === 1 ? "" : "s"}
+                    {row.bonusPoints > 0 && ` · ${row.bonusPoints} bonus`} · {row.matchesPlayed} played
                   </span>
                 </div>
                 {note && (

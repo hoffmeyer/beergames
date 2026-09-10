@@ -8,6 +8,7 @@ type TeamStandingRow = {
   color: string;
   wins: number;
   matches_played: number;
+  bonus_points: number;
 };
 
 type MatchPairRow = {
@@ -34,11 +35,14 @@ leaderboard.get("/", async (c) => {
          COALESCE(SUM(CASE
            WHEN m.winner_team_number IS NOT NULL
             AND (m.team_a_number = t.number OR m.team_b_number = t.number)
-           THEN 1 ELSE 0 END), 0)                                                      AS matches_played
+           THEN 1 ELSE 0 END), 0)                                                      AS matches_played,
+         (SELECT COALESCE(SUM(b.points), 0)
+          FROM team_bonus_points b
+          WHERE b.team_number = t.number)                                              AS bonus_points
        FROM teams t
        LEFT JOIN matches m ON m.team_a_number = t.number OR m.team_b_number = t.number
        GROUP BY t.number
-       ORDER BY wins DESC, t.number ASC`,
+       ORDER BY wins DESC, bonus_points DESC, t.number ASC`,
     ).all<TeamStandingRow>(),
     c.env.DB.prepare(`SELECT team_a_number, team_b_number, winner_team_number FROM matches`).all<MatchPairRow>(),
   ]);
@@ -52,7 +56,11 @@ leaderboard.get("/", async (c) => {
   let index = 0;
   while (index < standings.length) {
     let groupEnd = index + 1;
-    while (groupEnd < standings.length && standings[groupEnd].wins === standings[index].wins) {
+    while (
+      groupEnd < standings.length &&
+      standings[groupEnd].wins === standings[index].wins &&
+      standings[groupEnd].bonus_points === standings[index].bonus_points
+    ) {
       groupEnd++;
     }
     const group = standings.slice(index, groupEnd);
@@ -117,6 +125,7 @@ function toRow(args: {
     color: team.color,
     wins: team.wins,
     matchesPlayed: team.matches_played,
+    bonusPoints: team.bonus_points,
     rank,
     resolvedBy,
     needsTiebreaker,

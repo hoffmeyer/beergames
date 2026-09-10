@@ -4,6 +4,7 @@ import { teams } from "./routes/teams";
 import { schedule } from "./routes/schedule";
 import { matches } from "./routes/matches";
 import { leaderboard } from "./routes/leaderboard";
+import { teamBonusPoints } from "./routes/team-bonus-points";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -12,6 +13,7 @@ app.route("/api/teams", teams);
 app.route("/api/schedule", schedule);
 app.route("/api/matches", matches);
 app.route("/api/leaderboard", leaderboard);
+app.route("/api", teamBonusPoints);
 
 // Anything else falls through to the static assets binding, which applies
 // the single-page-application fallback (serves index.html) for unknown paths.

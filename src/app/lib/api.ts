@@ -1,8 +1,9 @@
 import type { Team } from "../../../shared/team";
 import type { ScheduleRound } from "../../../shared/schedule";
 import type { LeaderboardRow } from "../../../shared/leaderboard";
+import type { TeamBonusPoint } from "../../../shared/team-bonus-point";
 
-export type { Team, ScheduleRound, LeaderboardRow };
+export type { Team, ScheduleRound, LeaderboardRow, TeamBonusPoint };
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -33,6 +34,40 @@ export function updateTeam(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   }).then((res) => handleResponse<Team>(res));
+}
+
+export function fetchTeamBonusPoints(teamNumber: number): Promise<TeamBonusPoint[]> {
+  return fetch(`/api/teams/${teamNumber}/bonus-points`).then((res) =>
+    handleResponse<TeamBonusPoint[]>(res),
+  );
+}
+
+export function createTeamBonusPoint(
+  teamNumber: number,
+  input: { points: number; description: string },
+): Promise<TeamBonusPoint> {
+  return fetch(`/api/teams/${teamNumber}/bonus-points`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  }).then((res) => handleResponse<TeamBonusPoint>(res));
+}
+
+export function updateTeamBonusPoint(
+  id: number,
+  input: { points?: number; description?: string },
+): Promise<TeamBonusPoint> {
+  return fetch(`/api/bonus-points/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  }).then((res) => handleResponse<TeamBonusPoint>(res));
+}
+
+export function deleteTeamBonusPoint(id: number): Promise<TeamBonusPoint> {
+  return fetch(`/api/bonus-points/${id}`, { method: "DELETE" }).then((res) =>
+    handleResponse<TeamBonusPoint>(res),
+  );
 }
 
 export function fetchSchedule(): Promise<ScheduleRound[]> {

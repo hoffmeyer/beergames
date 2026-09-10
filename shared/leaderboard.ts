@@ -4,6 +4,7 @@ export type LeaderboardRow = {
   color: string;
   wins: number;
   matchesPlayed: number;
+  bonusPoints: number;
   /** Competition ranking (1, 2, 2, 4, ...) — ties share a rank until resolved. */
   rank: number;
   resolvedBy: "head_to_head" | null;

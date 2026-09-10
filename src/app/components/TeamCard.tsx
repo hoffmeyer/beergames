@@ -1,5 +1,13 @@
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColorPicker } from "./ColorPicker";
+import { BonusPointsEditor } from "./BonusPointsEditor";
+import {
+  createTeamBonusPoint,
+  deleteTeamBonusPoint,
+  fetchTeamBonusPoints,
+  updateTeamBonusPoint,
+} from "../lib/api";
 import type { Team } from "../lib/api";
 
 type TeamCardProps = {
@@ -15,6 +23,34 @@ export function TeamCard({ team, takenColors, onSave }: TeamCardProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
+  const bonusPointsQuery = useQuery({
+    queryKey: ["bonus-points", team.number],
+    queryFn: () => fetchTeamBonusPoints(team.number),
+  });
+  const bonusPoints = bonusPointsQuery.data ?? [];
+  const bonusTotal = bonusPoints.reduce((sum, entry) => sum + entry.points, 0);
+
+  function invalidateBonusPoints() {
+    queryClient.invalidateQueries({ queryKey: ["bonus-points", team.number] });
+    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+  }
+
+  const addBonusPointMutation = useMutation({
+    mutationFn: (input: { points: number; description: string }) =>
+      createTeamBonusPoint(team.number, input),
+    onSuccess: invalidateBonusPoints,
+  });
+  const editBonusPointMutation = useMutation({
+    mutationFn: ({ id, input }: { id: number; input: { points?: number; description?: string } }) =>
+      updateTeamBonusPoint(id, input),
+    onSuccess: invalidateBonusPoints,
+  });
+  const deleteBonusPointMutation = useMutation({
+    mutationFn: (id: number) => deleteTeamBonusPoint(id),
+    onSuccess: invalidateBonusPoints,
+  });
+
   if (!editing) {
     return (
       <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
@@ -26,6 +62,11 @@ export function TeamCard({ team, takenColors, onSave }: TeamCardProps) {
           <span className="truncate font-medium">
             #{team.number} {team.name}
           </span>
+          {bonusTotal > 0 && (
+            <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+              +{bonusTotal} bonus
+            </span>
+          )}
         </div>
         <button
           type="button"
@@ -81,6 +122,13 @@ export function TeamCard({ team, takenColors, onSave }: TeamCardProps) {
           Cancel
         </button>
       </div>
+
+      <BonusPointsEditor
+        entries={bonusPoints}
+        onAdd={(input) => addBonusPointMutation.mutateAsync(input)}
+        onEdit={(id, input) => editBonusPointMutation.mutateAsync({ id, input })}
+        onDelete={(id) => deleteBonusPointMutation.mutateAsync(id)}
+      />
     </div>
   );
 }
