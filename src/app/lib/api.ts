@@ -93,3 +93,9 @@ export function clearMatchResult(matchId: number): Promise<MatchResult> {
 export function fetchLeaderboard(): Promise<LeaderboardRow[]> {
   return fetch("/api/leaderboard").then((res) => handleResponse<LeaderboardRow[]>(res));
 }
+
+export function resetTournament(): Promise<{ ok: true }> {
+  return fetch("/api/admin/reset", { method: "POST" }).then((res) =>
+    handleResponse<{ ok: true }>(res),
+  );
+}

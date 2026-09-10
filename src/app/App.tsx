@@ -2,6 +2,7 @@ import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
 import { TeamsPage } from "./pages/TeamsPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
+import { AdminPage } from "./pages/AdminPage";
 
 function BottomNav() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -38,6 +39,7 @@ function App() {
           <Route path="/" element={<TeamsPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
         <BottomNav />
       </div>
