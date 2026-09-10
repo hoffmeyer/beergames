@@ -10,5 +10,5 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "beerlympiad"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "e373a4a1-8f88-45b5-bd82-4e96739c699a"
 migrations_dir = "migrations"
