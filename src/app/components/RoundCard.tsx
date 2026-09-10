@@ -2,7 +2,13 @@ import type { ScheduleRound } from "../../../shared/schedule";
 import { MatchRow } from "./MatchRow";
 import { teamLabel } from "../lib/teamLabel";
 
-export function RoundCard({ round }: { round: ScheduleRound }) {
+export function RoundCard({
+  round,
+  onSelectMatch,
+}: {
+  round: ScheduleRound;
+  onSelectMatch: (match: ScheduleRound["matches"][number]) => void;
+}) {
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4">
       <div className="flex items-baseline justify-between">
@@ -11,7 +17,7 @@ export function RoundCard({ round }: { round: ScheduleRound }) {
       </div>
       <div className="flex flex-col gap-2">
         {round.matches.map((match) => (
-          <MatchRow key={match.id} match={match} />
+          <MatchRow key={match.id} match={match} onSelect={onSelectMatch} />
         ))}
       </div>
     </div>
