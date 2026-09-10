@@ -1,6 +1,7 @@
 import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
 import { TeamsPage } from "./pages/TeamsPage";
 import { SchedulePage } from "./pages/SchedulePage";
+import { LeaderboardPage } from "./pages/LeaderboardPage";
 
 function BottomNav() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -16,6 +17,9 @@ function BottomNav() {
       <NavLink to="/schedule" className={linkClass}>
         Schedule
       </NavLink>
+      <NavLink to="/leaderboard" className={linkClass}>
+        Leaderboard
+      </NavLink>
     </nav>
   );
 }
@@ -27,6 +31,7 @@ function App() {
         <Routes>
           <Route path="/" element={<TeamsPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
         </Routes>
         <BottomNav />
       </div>

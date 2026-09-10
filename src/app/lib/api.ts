@@ -1,7 +1,8 @@
 import type { Team } from "../../../shared/team";
 import type { ScheduleRound } from "../../../shared/schedule";
+import type { LeaderboardRow } from "../../../shared/leaderboard";
 
-export type { Team, ScheduleRound };
+export type { Team, ScheduleRound, LeaderboardRow };
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -52,4 +53,8 @@ export function clearMatchResult(matchId: number): Promise<MatchResult> {
   return fetch(`/api/matches/${matchId}/result`, { method: "DELETE" }).then((res) =>
     handleResponse<MatchResult>(res),
   );
+}
+
+export function fetchLeaderboard(): Promise<LeaderboardRow[]> {
+  return fetch("/api/leaderboard").then((res) => handleResponse<LeaderboardRow[]>(res));
 }
