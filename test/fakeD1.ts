@@ -13,8 +13,9 @@ type DatabaseSyncCtor = new (location: string) => {
 const { DatabaseSync } = process.getBuiltinModule("node:sqlite") as {
   DatabaseSync: DatabaseSyncCtor;
 };
-const { readFileSync } = process.getBuiltinModule("node:fs") as {
+const { readFileSync, readdirSync } = process.getBuiltinModule("node:fs") as {
   readFileSync: (path: string, encoding: string) => string;
+  readdirSync: (path: string) => string[];
 };
 const { fileURLToPath } = process.getBuiltinModule("node:url") as {
   fileURLToPath: (url: URL) => string;
@@ -38,8 +39,13 @@ function makeStatement(db: InstanceType<DatabaseSyncCtor>, sql: string, params: 
 /** A D1Database-shaped wrapper around node:sqlite, seeded with the real migrations. */
 export function createFakeD1() {
   const db = new DatabaseSync(":memory:");
-  const migrationUrl = new URL("../migrations/0001_teams.sql", import.meta.url);
-  db.exec(readFileSync(fileURLToPath(migrationUrl), "utf-8"));
+  const migrationsDir = fileURLToPath(new URL("../migrations", import.meta.url));
+  const migrationFiles = readdirSync(migrationsDir)
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+  for (const file of migrationFiles) {
+    db.exec(readFileSync(fileURLToPath(new URL(`../migrations/${file}`, import.meta.url)), "utf-8"));
+  }
 
   return {
     prepare: (sql: string) => makeStatement(db, sql, []),

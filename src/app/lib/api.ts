@@ -1,6 +1,7 @@
 import type { Team } from "../../../shared/team";
+import type { ScheduleRound } from "../../../shared/schedule";
 
-export type { Team };
+export type { Team, ScheduleRound };
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -31,4 +32,8 @@ export function updateTeam(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   }).then((res) => handleResponse<Team>(res));
+}
+
+export function fetchSchedule(): Promise<ScheduleRound[]> {
+  return fetch("/api/schedule").then((res) => handleResponse<ScheduleRound[]>(res));
 }
