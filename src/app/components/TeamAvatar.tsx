@@ -1,6 +1,6 @@
 const SIZE_CLASSES = {
-  sm: "h-4 w-4",
-  md: "h-8 w-8",
+  sm: "h-8 w-8",
+  md: "h-16 w-16",
 } as const;
 
 type TeamAvatarProps = {
