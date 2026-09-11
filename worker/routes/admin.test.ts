@@ -49,13 +49,41 @@ function resetTournament(env: Env) {
   return app.request("/api/admin/reset", { method: "POST" }, env);
 }
 
+async function createAllTeams(env: Env) {
+  const avatars = [
+    "alpha-avatar.webp",
+    "beer-avatar.webp",
+    "buttcrack-avatar.webp",
+    "gigachad-avatar.webp",
+    "heavymetal-avatar.webp",
+  ];
+  for (let i = 0; i < 5; i++) {
+    await createTeam(env, `Team ${i + 1}`, avatars[i]);
+  }
+}
+
+function createEvent(env: Env, name: string) {
+  return app.request(
+    "/api/events",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        placements: [1, 2, 3, 4, 5].map((teamNumber) => ({ teamNumber, rank: teamNumber })),
+      }),
+    },
+    env,
+  );
+}
+
 describe("POST /api/admin/reset", () => {
-  it("clears teams, bonus points, and match results", async () => {
+  it("clears teams, bonus points, match results, and events", async () => {
     const env = testEnv();
-    await createTeam(env, "Alpha", "alpha-avatar.webp");
-    await createTeam(env, "Beta", "beer-avatar.webp");
+    await createAllTeams(env);
     await addBonusPoint(env, 1, 5, "Best costume");
     await recordResult(env, 1, 1);
+    await createEvent(env, "Kubb");
 
     const res = await resetTournament(env);
     expect(res.status).toBe(200);
@@ -69,6 +97,9 @@ describe("POST /api/admin/reset", () => {
     const schedule = (await (await app.request("/api/schedule", {}, env)).json()) as ScheduleRound[];
     const firstMatch = schedule[0].matches[0];
     expect(firstMatch.winnerTeamNumber).toBeNull();
+
+    const events = await (await app.request("/api/events", {}, env)).json();
+    expect(events).toEqual([]);
   });
 
   it("leaves the fixed schedule rows in place", async () => {
