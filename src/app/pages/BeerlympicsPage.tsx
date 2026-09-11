@@ -8,7 +8,7 @@ import { LoadingState } from "../components/LoadingState";
 import { ErrorState } from "../components/ErrorState";
 import type { ScheduleMatch } from "../../../shared/schedule";
 
-export function SchedulePage() {
+export function BeerlympicsPage() {
   const queryClient = useQueryClient();
   const scheduleQuery = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
   const standingsQuery = useQuery({ queryKey: ["schedule-standings"], queryFn: fetchScheduleStandings });
@@ -53,7 +53,7 @@ export function SchedulePage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-xl font-semibold">Schedule</h1>
+      <h1 className="text-xl font-semibold">Beerlympics</h1>
       {rounds.map((round) => (
         <RoundCard key={round.roundNumber} round={round} onSelectMatch={(match) => setSelectedMatchId(match.id)} />
       ))}

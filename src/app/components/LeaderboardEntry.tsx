@@ -38,9 +38,13 @@ export function LeaderboardEntry({ row, note }: LeaderboardEntryProps) {
         <span className="w-6 text-right font-semibold text-gray-500">{row.rank}</span>
         <TeamAvatar avatar={row.avatar} size="sm" />
         <span className="min-w-0 flex-1 truncate font-medium">{row.name}</span>
-        <span className="shrink-0 text-sm text-gray-600">
-          {row.eventPoints} event pt{row.eventPoints === 1 ? "" : "s"} · {row.bonusPoints} bonus pt
-          {row.bonusPoints === 1 ? "" : "s"}
+        <span className="flex shrink-0 flex-col items-end gap-1 text-sm text-gray-600">
+          <span>{row.eventPoints}</span>
+          {row.bonusPoints > 0 && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+              +{row.bonusPoints} bonus
+            </span>
+          )}
         </span>
         <button
           type="button"

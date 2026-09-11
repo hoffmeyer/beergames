@@ -1,6 +1,6 @@
 import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
 import { TeamsPage } from "./pages/TeamsPage";
-import { SchedulePage } from "./pages/SchedulePage";
+import { BeerlympicsPage } from "./pages/BeerlympicsPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { AdminPage } from "./pages/AdminPage";
 
@@ -18,8 +18,8 @@ function BottomNav() {
       <NavLink to="/" end className={linkClass}>
         Teams
       </NavLink>
-      <NavLink to="/schedule" className={linkClass}>
-        Schedule
+      <NavLink to="/beerlympics" className={linkClass}>
+        Beerlympics
       </NavLink>
       <NavLink to="/leaderboard" className={linkClass}>
         Leaderboard
@@ -37,7 +37,7 @@ function App() {
       >
         <Routes>
           <Route path="/" element={<TeamsPage />} />
-          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/beerlympics" element={<BeerlympicsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
