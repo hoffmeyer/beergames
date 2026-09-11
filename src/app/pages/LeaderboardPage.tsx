@@ -3,7 +3,7 @@ import { fetchLeaderboard } from "../lib/api";
 import type { LeaderboardRow } from "../lib/api";
 import { LoadingState } from "../components/LoadingState";
 import { ErrorState } from "../components/ErrorState";
-import { TeamAvatar } from "../components/TeamAvatar";
+import { LeaderboardEntry } from "../components/LeaderboardEntry";
 
 function tiedNames(rows: LeaderboardRow[], row: LeaderboardRow): string {
   const byNumber = new Map(rows.map((r) => [r.number, r.name]));
@@ -50,27 +50,9 @@ export function LeaderboardPage() {
         <p className="text-gray-500">No teams yet.</p>
       ) : (
         <ol className="flex flex-col gap-2">
-          {rows.map((row) => {
-            const note = tieNote(rows, row);
-            return (
-              <li key={row.number} className="flex flex-col gap-1 rounded-lg border border-gray-200 p-3">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 text-right font-semibold text-gray-500">{row.rank}</span>
-                  <TeamAvatar avatar={row.avatar} size="sm" />
-                  <span className="min-w-0 flex-1 truncate font-medium">{row.name}</span>
-                  <span className="shrink-0 text-sm text-gray-600">
-                    {row.wins} win{row.wins === 1 ? "" : "s"}
-                    {row.bonusPoints > 0 && ` · ${row.bonusPoints} bonus`} · {row.matchesPlayed} played
-                  </span>
-                </div>
-                {note && (
-                  <p className={`text-xs ${note.tone === "amber" ? "font-medium text-amber-600" : "text-gray-500"}`}>
-                    {note.text}
-                  </p>
-                )}
-              </li>
-            );
-          })}
+          {rows.map((row) => (
+            <LeaderboardEntry key={row.number} row={row} note={tieNote(rows, row)} />
+          ))}
         </ol>
       )}
     </div>

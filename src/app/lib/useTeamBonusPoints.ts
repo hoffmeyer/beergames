@@ -6,11 +6,12 @@ import {
   updateTeamBonusPoint,
 } from "./api";
 
-export function useTeamBonusPoints(teamNumber: number) {
+export function useTeamBonusPoints(teamNumber: number, options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
   const bonusPointsQuery = useQuery({
     queryKey: ["bonus-points", teamNumber],
     queryFn: () => fetchTeamBonusPoints(teamNumber),
+    enabled: options?.enabled,
   });
   const bonusPoints = bonusPointsQuery.data ?? [];
   const bonusTotal = bonusPoints.reduce((sum, entry) => sum + entry.points, 0);
@@ -38,6 +39,7 @@ export function useTeamBonusPoints(teamNumber: number) {
   return {
     bonusPoints,
     bonusTotal,
+    isLoading: bonusPointsQuery.isLoading,
     isError: bonusPointsQuery.isError,
     add: (input: { points: number; description: string }) => addMutation.mutateAsync(input),
     edit: (id: number, input: { points?: number; description?: string }) =>
