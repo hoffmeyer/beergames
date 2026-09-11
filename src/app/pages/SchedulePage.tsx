@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { clearMatchResult, fetchSchedule, recordMatchResult } from "../lib/api";
+import { clearMatchResult, fetchSchedule, fetchScheduleStandings, recordMatchResult } from "../lib/api";
 import { RoundCard } from "../components/RoundCard";
 import { ScoreEntryModal } from "../components/ScoreEntryModal";
+import { ScheduleStandingsPreview } from "../components/ScheduleStandingsPreview";
 import { LoadingState } from "../components/LoadingState";
 import { ErrorState } from "../components/ErrorState";
 import type { ScheduleMatch } from "../../../shared/schedule";
@@ -10,6 +11,7 @@ import type { ScheduleMatch } from "../../../shared/schedule";
 export function SchedulePage() {
   const queryClient = useQueryClient();
   const scheduleQuery = useQuery({ queryKey: ["schedule"], queryFn: fetchSchedule });
+  const standingsQuery = useQuery({ queryKey: ["schedule-standings"], queryFn: fetchScheduleStandings });
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
 
   const recordMutation = useMutation({
@@ -18,6 +20,7 @@ export function SchedulePage() {
     onSuccess: () => {
       clearMutation.reset();
       queryClient.invalidateQueries({ queryKey: ["schedule"] });
+      queryClient.invalidateQueries({ queryKey: ["schedule-standings"] });
     },
   });
 
@@ -26,6 +29,7 @@ export function SchedulePage() {
     onSuccess: () => {
       recordMutation.reset();
       queryClient.invalidateQueries({ queryKey: ["schedule"] });
+      queryClient.invalidateQueries({ queryKey: ["schedule-standings"] });
     },
   });
 
@@ -53,6 +57,7 @@ export function SchedulePage() {
       {rounds.map((round) => (
         <RoundCard key={round.roundNumber} round={round} onSelectMatch={(match) => setSelectedMatchId(match.id)} />
       ))}
+      {standingsQuery.data && <ScheduleStandingsPreview rows={standingsQuery.data} />}
       {selectedMatch && (
         <ScoreEntryModal
           match={selectedMatch}

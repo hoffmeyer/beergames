@@ -2,14 +2,12 @@ export type LeaderboardRow = {
   number: number;
   name: string;
   avatar: string;
-  wins: number;
-  matchesPlayed: number;
+  eventPoints: number;
   bonusPoints: number;
   /** Competition ranking (1, 2, 2, 4, ...) — ties share a rank until resolved. */
   rank: number;
-  resolvedBy: "head_to_head" | null;
-  /** True for an unresolved 3+-team tie cycle; settled manually outside the app. */
+  /** True when this team is tied with another on both event and bonus points. */
   needsTiebreaker: boolean;
-  /** Other team numbers sharing this rank's win count, empty when not tied. */
+  /** Other team numbers sharing this rank, empty when not tied. */
   tiedWith: number[];
 };

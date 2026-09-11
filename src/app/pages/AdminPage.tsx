@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchTeams, resetTournament } from "../lib/api";
 import { AdminTeamBonusPoints } from "../components/AdminTeamBonusPoints";
+import { AdminEvents } from "../components/AdminEvents";
 import { LoadingState } from "../components/LoadingState";
 import { ErrorState } from "../components/ErrorState";
 
@@ -15,12 +16,13 @@ export function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["schedule"] });
       queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
       queryClient.invalidateQueries({ queryKey: ["bonus-points"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
 
   function handleReset() {
     const confirmed = window.confirm(
-      "This deletes all teams, bonus points, and recorded match results, and cannot be undone. Reset the tournament?",
+      "This deletes all teams, bonus points, events, and recorded match results, and cannot be undone. Reset the tournament?",
     );
     if (confirmed) {
       resetMutation.reset();
@@ -41,11 +43,13 @@ export function AdminPage() {
         {teamsQuery.data?.map((team) => <AdminTeamBonusPoints key={team.number} team={team} />)}
       </div>
 
+      <AdminEvents />
+
       <div className="flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 p-4">
         <h2 className="font-medium text-red-900">Reset tournament</h2>
         <p className="text-sm text-red-800">
-          Deletes all teams, bonus points, and recorded match results so the app is ready for a new
-          tournament. The fixed round/match schedule stays in place. This cannot be undone.
+          Deletes all teams, bonus points, events, and recorded match results so the app is ready for a
+          new tournament. The fixed round/match schedule stays in place. This cannot be undone.
         </p>
         <button
           type="button"

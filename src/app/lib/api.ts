@@ -2,8 +2,12 @@ import type { Team } from "../../../shared/team";
 import type { ScheduleRound } from "../../../shared/schedule";
 import type { LeaderboardRow } from "../../../shared/leaderboard";
 import type { TeamBonusPoint } from "../../../shared/team-bonus-point";
+import type { Event, EventPlacement } from "../../../shared/event";
+import { POINTS_TABLE } from "../../../shared/event";
+import type { ScheduleStandingRow } from "../../../shared/schedule-standings";
 
-export type { Team, ScheduleRound, LeaderboardRow, TeamBonusPoint };
+export type { Team, ScheduleRound, LeaderboardRow, TeamBonusPoint, Event, EventPlacement, ScheduleStandingRow };
+export { POINTS_TABLE };
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -98,4 +102,41 @@ export function resetTournament(): Promise<{ ok: true }> {
   return fetch("/api/admin/reset", { method: "POST" }).then((res) =>
     handleResponse<{ ok: true }>(res),
   );
+}
+
+export function fetchEvents(): Promise<Event[]> {
+  return fetch("/api/events").then((res) => handleResponse<Event[]>(res));
+}
+
+export function createEvent(input: { name: string; placements: EventPlacement[] }): Promise<Event> {
+  return fetch("/api/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  }).then((res) => handleResponse<Event>(res));
+}
+
+export function updateEvent(
+  id: number,
+  input: { name?: string; placements?: EventPlacement[] },
+): Promise<Event> {
+  return fetch(`/api/events/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  }).then((res) => handleResponse<Event>(res));
+}
+
+export function deleteEvent(id: number): Promise<Event> {
+  return fetch(`/api/events/${id}`, { method: "DELETE" }).then((res) => handleResponse<Event>(res));
+}
+
+export type TeamEventEntry = { eventId: number; eventName: string; rank: number; points: number };
+
+export function fetchTeamEvents(teamNumber: number): Promise<TeamEventEntry[]> {
+  return fetch(`/api/teams/${teamNumber}/events`).then((res) => handleResponse<TeamEventEntry[]>(res));
+}
+
+export function fetchScheduleStandings(): Promise<ScheduleStandingRow[]> {
+  return fetch("/api/schedule/standings").then((res) => handleResponse<ScheduleStandingRow[]>(res));
 }

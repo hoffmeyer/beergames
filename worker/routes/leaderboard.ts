@@ -6,51 +6,33 @@ type TeamStandingRow = {
   number: number;
   name: string;
   avatar: string;
-  wins: number;
-  matches_played: number;
+  event_points: number;
   bonus_points: number;
 };
-
-type MatchPairRow = {
-  team_a_number: number;
-  team_b_number: number;
-  winner_team_number: number | null;
-};
-
-/** Order-independent key for a pair of team numbers, since each pair plays exactly one match. */
-function pairKey(a: number, b: number): string {
-  return a < b ? `${a}-${b}` : `${b}-${a}`;
-}
 
 export const leaderboard = new Hono<{ Bindings: Env }>();
 
 leaderboard.get("/", async (c) => {
-  const [{ results: standings }, { results: allMatches }] = await Promise.all([
-    c.env.DB.prepare(
-      `SELECT
-         t.number                                                                      AS number,
-         t.name                                                                        AS name,
-         t.avatar                                                                      AS avatar,
-         COALESCE(SUM(CASE WHEN m.winner_team_number = t.number THEN 1 ELSE 0 END), 0) AS wins,
-         COALESCE(SUM(CASE
-           WHEN m.winner_team_number IS NOT NULL
-            AND (m.team_a_number = t.number OR m.team_b_number = t.number)
-           THEN 1 ELSE 0 END), 0)                                                      AS matches_played,
-         (SELECT COALESCE(SUM(b.points), 0)
-          FROM team_bonus_points b
-          WHERE b.team_number = t.number)                                              AS bonus_points
-       FROM teams t
-       LEFT JOIN matches m ON m.team_a_number = t.number OR m.team_b_number = t.number
-       GROUP BY t.number
-       ORDER BY wins DESC, bonus_points DESC, t.number ASC`,
-    ).all<TeamStandingRow>(),
-    c.env.DB.prepare(`SELECT team_a_number, team_b_number, winner_team_number FROM matches`).all<MatchPairRow>(),
-  ]);
-
-  const headToHeadWinner = new Map<string, number | null>();
-  for (const match of allMatches) {
-    headToHeadWinner.set(pairKey(match.team_a_number, match.team_b_number), match.winner_team_number);
-  }
+  const { results: standings } = await c.env.DB.prepare(
+    `SELECT
+       t.number AS number,
+       t.name   AS name,
+       t.avatar AS avatar,
+       (SELECT COALESCE(SUM(CASE ep.rank
+              WHEN 1 THEN 10
+              WHEN 2 THEN 7
+              WHEN 3 THEN 5
+              WHEN 4 THEN 3
+              WHEN 5 THEN 1
+            END), 0)
+        FROM event_placements ep
+        WHERE ep.team_number = t.number)                AS event_points,
+       (SELECT COALESCE(SUM(b.points), 0)
+        FROM team_bonus_points b
+        WHERE b.team_number = t.number)                 AS bonus_points
+     FROM teams t
+     ORDER BY event_points DESC, bonus_points DESC, t.number ASC`,
+  ).all<TeamStandingRow>();
 
   const rows: LeaderboardRow[] = [];
   let index = 0;
@@ -58,51 +40,26 @@ leaderboard.get("/", async (c) => {
     let groupEnd = index + 1;
     while (
       groupEnd < standings.length &&
-      standings[groupEnd].wins === standings[index].wins &&
+      standings[groupEnd].event_points === standings[index].event_points &&
       standings[groupEnd].bonus_points === standings[index].bonus_points
     ) {
       groupEnd++;
     }
     const group = standings.slice(index, groupEnd);
     const rank = index + 1;
+    const tied = group.length > 1;
 
-    if (group.length === 1) {
-      rows.push(toRow({ team: group[0], rank, resolvedBy: null, needsTiebreaker: false, tiedWith: [] }));
-    } else if (group.length === 2) {
-      const [teamX, teamY] = group;
-      const winner = headToHeadWinner.get(pairKey(teamX.number, teamY.number)) ?? null;
-      const [first, second] = winner === teamY.number ? [teamY, teamX] : [teamX, teamY];
-
-      rows.push(
-        toRow({
-          team: first,
-          rank,
-          resolvedBy: winner ? "head_to_head" : null,
-          needsTiebreaker: false,
-          tiedWith: [second.number],
-        }),
-      );
-      rows.push(
-        toRow({
-          team: second,
-          rank: winner ? rank + 1 : rank,
-          resolvedBy: winner ? "head_to_head" : null,
-          needsTiebreaker: false,
-          tiedWith: [first.number],
-        }),
-      );
-    } else {
-      for (const team of group) {
-        rows.push(
-          toRow({
-            team,
-            rank,
-            resolvedBy: null,
-            needsTiebreaker: true,
-            tiedWith: group.filter((t) => t.number !== team.number).map((t) => t.number),
-          }),
-        );
-      }
+    for (const team of group) {
+      rows.push({
+        number: team.number,
+        name: team.name,
+        avatar: team.avatar,
+        eventPoints: team.event_points,
+        bonusPoints: team.bonus_points,
+        rank,
+        needsTiebreaker: tied,
+        tiedWith: tied ? group.filter((t) => t.number !== team.number).map((t) => t.number) : [],
+      });
     }
 
     index = groupEnd;
@@ -110,25 +67,3 @@ leaderboard.get("/", async (c) => {
 
   return c.json(rows);
 });
-
-function toRow(args: {
-  team: TeamStandingRow;
-  rank: number;
-  resolvedBy: LeaderboardRow["resolvedBy"];
-  needsTiebreaker: boolean;
-  tiedWith: number[];
-}): LeaderboardRow {
-  const { team, rank, resolvedBy, needsTiebreaker, tiedWith } = args;
-  return {
-    number: team.number,
-    name: team.name,
-    avatar: team.avatar,
-    wins: team.wins,
-    matchesPlayed: team.matches_played,
-    bonusPoints: team.bonus_points,
-    rank,
-    resolvedBy,
-    needsTiebreaker,
-    tiedWith,
-  };
-}

@@ -1,6 +1,17 @@
 import { Hono } from "hono";
 import type { Env } from "../env";
 import type { MatchEvent, ScheduleRound, ScheduleTeamRef } from "../../shared/schedule";
+import type { ScheduleStandingRow } from "../../shared/schedule-standings";
+import { POINTS_TABLE } from "../../shared/event";
+
+type TeamStandingRow = {
+  number: number;
+  name: string;
+  avatar: string;
+  wins: number;
+  matches_played: number;
+  bonus_points: number;
+};
 
 type ScheduleRow = {
   round_number: number;
@@ -74,4 +85,63 @@ schedule.get("/", async (c) => {
   }
 
   return c.json([...rounds.values()]);
+});
+
+// Reference-only preview for the schedule page: ranks by wins/bonus points,
+// the same way the real leaderboard used to before it moved to event points.
+// Has no effect on real scoring — it exists purely to help the admin know
+// what to type into the eventual "Tournament" event.
+schedule.get("/standings", async (c) => {
+  const { results: standings } = await c.env.DB.prepare(
+    `SELECT
+       t.number                                                                      AS number,
+       t.name                                                                        AS name,
+       t.avatar                                                                      AS avatar,
+       COALESCE(SUM(CASE WHEN m.winner_team_number = t.number THEN 1 ELSE 0 END), 0) AS wins,
+       COALESCE(SUM(CASE
+         WHEN m.winner_team_number IS NOT NULL
+          AND (m.team_a_number = t.number OR m.team_b_number = t.number)
+         THEN 1 ELSE 0 END), 0)                                                      AS matches_played,
+       (SELECT COALESCE(SUM(b.points), 0)
+        FROM team_bonus_points b
+        WHERE b.team_number = t.number)                                              AS bonus_points
+     FROM teams t
+     LEFT JOIN matches m ON m.team_a_number = t.number OR m.team_b_number = t.number
+     GROUP BY t.number
+     ORDER BY wins DESC, bonus_points DESC, t.number ASC`,
+  ).all<TeamStandingRow>();
+
+  const rows: ScheduleStandingRow[] = [];
+  let index = 0;
+  while (index < standings.length) {
+    let groupEnd = index + 1;
+    while (
+      groupEnd < standings.length &&
+      standings[groupEnd].wins === standings[index].wins &&
+      standings[groupEnd].bonus_points === standings[index].bonus_points
+    ) {
+      groupEnd++;
+    }
+    const group = standings.slice(index, groupEnd);
+    const rank = index + 1;
+    const previewPoints = POINTS_TABLE[rank as keyof typeof POINTS_TABLE];
+
+    for (const team of group) {
+      rows.push({
+        number: team.number,
+        name: team.name,
+        avatar: team.avatar,
+        wins: team.wins,
+        matchesPlayed: team.matches_played,
+        bonusPoints: team.bonus_points,
+        rank,
+        previewPoints,
+        tiedWith: group.length > 1 ? group.filter((t) => t.number !== team.number).map((t) => t.number) : [],
+      });
+    }
+
+    index = groupEnd;
+  }
+
+  return c.json(rows);
 });

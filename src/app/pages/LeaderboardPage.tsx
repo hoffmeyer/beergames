@@ -10,21 +10,11 @@ function tiedNames(rows: LeaderboardRow[], row: LeaderboardRow): string {
   return row.tiedWith.map((number) => byNumber.get(number) ?? `Team ${number}`).join(", ");
 }
 
-type TieNote = { tone: "amber" | "gray"; text: string };
-
-function tieNote(rows: LeaderboardRow[], row: LeaderboardRow): TieNote | null {
+function tieNote(rows: LeaderboardRow[], row: LeaderboardRow): string | null {
   if (row.tiedWith.length === 0) {
     return null;
   }
-  const names = tiedNames(rows, row);
-  const tiedOn = row.bonusPoints > 0 ? "wins and bonus points" : "wins";
-  if (row.needsTiebreaker) {
-    return { tone: "amber", text: `Tied with ${names} — needs a manual tiebreaker.` };
-  }
-  if (row.resolvedBy === "head_to_head") {
-    return { tone: "gray", text: `Tied on ${tiedOn} with ${names} — ranked by head-to-head result.` };
-  }
-  return { tone: "gray", text: `Tied on ${tiedOn} with ${names} — pending their head-to-head match.` };
+  return `Tied with ${tiedNames(rows, row)} — needs more bonus points to resolve.`;
 }
 
 export function LeaderboardPage() {
