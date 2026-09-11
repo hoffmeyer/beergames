@@ -1,8 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { resetTournament } from "../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchTeams, resetTournament } from "../lib/api";
+import { AdminTeamBonusPoints } from "../components/AdminTeamBonusPoints";
+import { LoadingState } from "../components/LoadingState";
+import { ErrorState } from "../components/ErrorState";
 
 export function AdminPage() {
   const queryClient = useQueryClient();
+  const teamsQuery = useQuery({ queryKey: ["teams"], queryFn: fetchTeams });
 
   const resetMutation = useMutation({
     mutationFn: resetTournament,
@@ -27,6 +31,16 @@ export function AdminPage() {
   return (
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-xl font-semibold">Admin</h1>
+
+      <div className="flex flex-col gap-2">
+        <h2 className="font-medium">Bonus points</h2>
+        {teamsQuery.isLoading && <LoadingState label="Loading teams…" />}
+        {teamsQuery.isError && (
+          <ErrorState label="Failed to load teams." onRetry={() => teamsQuery.refetch()} />
+        )}
+        {teamsQuery.data?.map((team) => <AdminTeamBonusPoints key={team.number} team={team} />)}
+      </div>
+
       <div className="flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 p-4">
         <h2 className="font-medium text-red-900">Reset tournament</h2>
         <p className="text-sm text-red-800">

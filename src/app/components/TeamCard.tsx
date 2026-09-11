@@ -1,14 +1,7 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AvatarPicker } from "./AvatarPicker";
 import { TeamAvatar } from "./TeamAvatar";
-import { BonusPointsEditor } from "./BonusPointsEditor";
-import {
-  createTeamBonusPoint,
-  deleteTeamBonusPoint,
-  fetchTeamBonusPoints,
-  updateTeamBonusPoint,
-} from "../lib/api";
+import { useTeamBonusPoints } from "../lib/useTeamBonusPoints";
 import type { Team } from "../lib/api";
 
 type TeamCardProps = {
@@ -24,33 +17,7 @@ export function TeamCard({ team, takenAvatars, onSave }: TeamCardProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const queryClient = useQueryClient();
-  const bonusPointsQuery = useQuery({
-    queryKey: ["bonus-points", team.number],
-    queryFn: () => fetchTeamBonusPoints(team.number),
-  });
-  const bonusPoints = bonusPointsQuery.data ?? [];
-  const bonusTotal = bonusPoints.reduce((sum, entry) => sum + entry.points, 0);
-
-  function invalidateBonusPoints() {
-    queryClient.invalidateQueries({ queryKey: ["bonus-points", team.number] });
-    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-  }
-
-  const addBonusPointMutation = useMutation({
-    mutationFn: (input: { points: number; description: string }) =>
-      createTeamBonusPoint(team.number, input),
-    onSuccess: invalidateBonusPoints,
-  });
-  const editBonusPointMutation = useMutation({
-    mutationFn: ({ id, input }: { id: number; input: { points?: number; description?: string } }) =>
-      updateTeamBonusPoint(id, input),
-    onSuccess: invalidateBonusPoints,
-  });
-  const deleteBonusPointMutation = useMutation({
-    mutationFn: (id: number) => deleteTeamBonusPoint(id),
-    onSuccess: invalidateBonusPoints,
-  });
+  const { bonusTotal } = useTeamBonusPoints(team.number);
 
   if (!editing) {
     return (
@@ -120,13 +87,6 @@ export function TeamCard({ team, takenAvatars, onSave }: TeamCardProps) {
           Cancel
         </button>
       </div>
-
-      <BonusPointsEditor
-        entries={bonusPoints}
-        onAdd={(input) => addBonusPointMutation.mutateAsync(input)}
-        onEdit={(id, input) => editBonusPointMutation.mutateAsync({ id, input })}
-        onDelete={(id) => deleteBonusPointMutation.mutateAsync(id)}
-      />
     </div>
   );
 }
